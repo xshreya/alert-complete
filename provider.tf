@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "newrelic" {
-  account_id = 4550857
-  api_key = "NRAK-Z9TBDCJ7HF22JKO463F3ZSB1KJD"
-  region = "US"
+  account_id = var.nr_account_id
+  api_key = var.nr_api_key
+  region = var.region-newrelic
 }

@@ -5,19 +5,9 @@ resource "newrelic_alert_policy" "infra-alert" {
 }
 
 
-resource "newrelic_alert_channel" "infra-notify" {
-  name = "notify"
-  type = "email"
-
-  config {
-    recipients              = "xshreya.sharma@gmail.com"
-    include_json_attachment = "true"
-  }
-}
-
 # CONDITION 
 resource "newrelic_nrql_alert_condition" "infra-con1" {
-  account_id                     = 4550857
+  account_id                     = var.nr_account_id
   policy_id                      = newrelic_alert_policy.infra-alert.id
   name                           = "infra-con1"
   description                    = "Changes in Infrastructure"
@@ -56,20 +46,20 @@ resource "newrelic_nrql_alert_condition" "infra-con1" {
 
 #DESTINATION 
 resource "newrelic_notification_destination" "infra-destinaiton" {
-  account_id = 4550857
+  account_id = var.nr_account_id
   name = "infra-destination"
   type = "EMAIL"
 
   property {
     key = "email"
-    value = "xshreya.sharma@gmail.com"
+    value = var.recipient-email
   }
 }
 
 
 #CHANNEL 
 resource "newrelic_notification_channel" "infra-channel" {
-  account_id = 4550857
+  account_id = var.nr_account_id
   name = "infra-channel"
   type = "EMAIL"
   destination_id = newrelic_notification_destination.infra-destinaiton.id
