@@ -1,7 +1,7 @@
 # POLICY CREATION
 resource "newrelic_alert_policy" "infra-alert" {
-  name = "infra-alert"
-  incident_preference = "PER_CONDITION" # PER_POLICY is default
+  name = var.policy_name
+  incident_preference = var.incident_preference # PER_POLICY is default
 }
 
 
@@ -9,37 +9,37 @@ resource "newrelic_alert_policy" "infra-alert" {
 resource "newrelic_nrql_alert_condition" "infra-con1" {
   account_id                     = var.nr_account_id
   policy_id                      = newrelic_alert_policy.infra-alert.id
-  name                           = "infra-con1"
-  description                    = "Changes in Infrastructure"
+  name                           = var.condition_name
+  description                    = var.con-desc
   # runbook_url                    = "https://www.example.com"
-  enabled                        = true
-  violation_time_limit_seconds   = 3600
-  fill_option                    = "last_value"
+  enabled                        = var.enabled
+  violation_time_limit_seconds   = var.violation_time_limit_seconds
+  fill_option                    = var.fill_option
   # fill_value                     = 1.0
-  aggregation_window             = 60
-  aggregation_method             = "event_flow"
-  aggregation_delay              = 120
-  expiration_duration            = 120
-  open_violation_on_expiration   = true
-  close_violations_on_expiration = true
-  slide_by                       = 30
+  aggregation_window             = var.aggregation_window
+  aggregation_method             = var.aggregation_method
+  aggregation_delay              = var.aggregation_delay
+  expiration_duration            = var.expiration_duration
+  open_violation_on_expiration   = var.open_violation_on_expiration
+  close_violations_on_expiration = var.close_violations_on_expiration
+  slide_by                       = var.slide_by
 
   nrql {
-    query = "FROM InfrastructureEvent SELECT count(*) WHERE changeType = 'added' AND format = 'inventoryChange' AND entityGuid = 'NDU1MDg1N3xJTkZSQXxOQXw3ODQxNTY5MjY0NDI5MzkxMzU5'"
+    query = var.query
   }
 
   critical {
-    operator              = "above"
-    threshold             = 5
-    threshold_duration    = 300
-    threshold_occurrences = "ALL"
+    operator              = var.crt_operator
+    threshold             = var.crt_threshold
+    threshold_duration    = var.crt_threshold_duration
+    threshold_occurrences = var.crt_threshold_occurrences
   }
 
   warning {
-    operator              = "above"
-    threshold             = 3
-    threshold_duration    = 600
-    threshold_occurrences = "ALL"
+    operator              = var.war_operator
+    threshold             = var.war_threshold
+    threshold_duration    = var.war_threshold_duration
+    threshold_occurrences = var.war_threshold_occurrences
   }
 }
 
@@ -47,11 +47,11 @@ resource "newrelic_nrql_alert_condition" "infra-con1" {
 #DESTINATION 
 resource "newrelic_notification_destination" "infra-destinaiton" {
   account_id = var.nr_account_id
-  name = "infra-destination"
-  type = "EMAIL"
+  name = var.dest_name
+  type = var.dest_type
 
   property {
-    key = "email"
+    key = var.dest_prop_key
     value = var.recipient-email
   }
 }
@@ -60,35 +60,35 @@ resource "newrelic_notification_destination" "infra-destinaiton" {
 #CHANNEL 
 resource "newrelic_notification_channel" "infra-channel" {
   account_id = var.nr_account_id
-  name = "infra-channel"
-  type = "EMAIL"
+  name = var.chnl_name
+  type = var.chnl_type
   destination_id = newrelic_notification_destination.infra-destinaiton.id
-  product = "IINT"
+  product = var.chnl_product
 
   property {
-    key = "subject"
-    value = "INFRA ALERT!"
+    key = var.chnl_subject_property
+    value = var.chnl_subject_property
   }
 
   property {
-    key = "customDetailsEmail"
-    value = "Changes in the Infrastructure"
+    key = var.chnl_cusDetails_property_key
+    value = var.chnl_cusDetails_property
   }
 }
 
 # WORKFLOW 
 resource "newrelic_workflow" "infra-workflow" {
-  name = "infra-workflow"
-  muting_rules_handling = "NOTIFY_ALL_ISSUES"
+  name = var.workflow_name
+  muting_rules_handling = var.muting_rules_handling
 
   issues_filter {
-    name = "filter"
-    type = "FILTER"
+    name = var.issue_filter_name
+    type = var.issue_filter_type
 
     predicate {
-      attribute = "priority"
-      operator = "EXACTLY_MATCHES"
-      values = [ "critical" ]
+      attribute = var.perdicate_attribute
+      operator = var.perdicate_operator
+      values = var.perdicate_values
     }
   }
 
